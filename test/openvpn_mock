@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 
 echo "$@"
-sleep 1
+sleep ${OPENVPN_DELAY-1}
 echo "Done"

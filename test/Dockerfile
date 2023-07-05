@@ -6,7 +6,7 @@ RUN curl -L -o bats.tar.gz https://github.com/bats-core/bats-core/archive/v1.4.1
     && cd bats-core-1.4.1 \
     && ./install.sh /usr/local
 RUN rm /usr/sbin/openvpn
-COPY openvpn /usr/sbin/openvpn
+COPY openvpn_mock /usr/sbin/openvpn
 
 RUN chmod +x /usr/sbin/openvpn
 
