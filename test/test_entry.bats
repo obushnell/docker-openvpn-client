@@ -203,3 +203,12 @@ setup() {
     [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config --route-up /usr/local/bin/killswitch.sh $ALLOWED_SUBNETS --auth-user-pass /run/secrets/$AUTH_SECRET" ]
     [ "${lines[2]}" = "Done" ]
 }
+
+@test "No OpenVPN configuration file found" {
+    setup
+
+    run entry.sh
+
+    [ "$status" -ne 0 ]
+    [ "${lines[0]}" = "no openvpn configuration file found" ]
+}

@@ -17,7 +17,7 @@ is_enabled() {
 if [[ $CONFIG_FILE ]]; then
     config_file=$(find /config -name "$CONFIG_FILE" 2> /dev/null | sort | shuf -n 1)
 else
-    config_file=$(find /config -name '*.conf' -o -name '*.ovpn' 2> /dev/null | sort | shuf -n 1)
+    config_file=$(find /config -name '*.conf' -o -name '*.ovpn' 2> /dev/null | sort | shuf -n 1 || echo "")
 fi
 
 if [[ -z $config_file ]]; then
