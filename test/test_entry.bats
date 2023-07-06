@@ -204,8 +204,19 @@ setup() {
     [ "${lines[2]}" = "Done" ]
 }
 
-@test "No OpenVPN configuration file found" {
+@test "No config folder" {
     setup
+
+    run entry.sh
+
+    [ "$status" -ne 0 ]
+    [ "${lines[0]}" = "no openvpn configuration file found" ]
+}
+
+@test "No config folder with specified config file" {
+    setup
+    export CONFIG_FILE_NAME=my.conf
+    export CONFIG_FILE=$CONFIG_FILE_NAME
 
     run entry.sh
 
