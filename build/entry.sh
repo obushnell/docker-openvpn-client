@@ -10,11 +10,12 @@ cleanup() {
 }
 
 is_enabled() {
-    [[ ${1,,} =~ ^(true|t|yes|y|1|on|enable|enabled)$ ]]
+    value=$(echo "$1" | tr '[:upper:]' '[:lower:]' | grep -qE '^(true|t|yes|y|1|on|enable|enabled)$' && echo "true" || echo "false")
+    [[ "${value}" = "true" ]]
 }
 
 # Either a specific file name or a pattern.
-if [[ $CONFIG_FILE ]]; then
+if [[ ${CONFIG_FILE-} ]]; then
     config_file=$(find /config -name "$CONFIG_FILE" 2> /dev/null | sort | shuf -n 1 || echo "")
 else
     config_file=$(find /config -name '*.conf' -o -name '*.ovpn' 2> /dev/null | sort | shuf -n 1 || echo "")
@@ -28,21 +29,18 @@ fi
 echo "using openvpn configuration file: $config_file"
 
 
-openvpn_args=(
-    "--config" "$config_file"
-    "--cd" "/config"
-)
+openvpn_args="--config $config_file --cd /config"
 
-if is_enabled "$KILL_SWITCH"; then
-    openvpn_args+=("--route-up" "/usr/local/bin/killswitch.sh $ALLOWED_SUBNETS")
+if is_enabled "${KILL_SWITCH-}"; then
+    openvpn_args="$openvpn_args --route-up /usr/local/bin/killswitch.sh '${ALLOWED_SUBNETS-}'"
 fi
 
 # Docker secret that contains the credentials for accessing the VPN.
-if [[ $AUTH_SECRET ]]; then
-    openvpn_args+=("--auth-user-pass" "/run/secrets/$AUTH_SECRET")
+if [[ ${AUTH_SECRET-} ]]; then
+    openvpn_args="$openvpn_args --auth-user-pass /run/secrets/$AUTH_SECRET"
 fi
 
-openvpn "${openvpn_args[@]}" &
+openvpn $openvpn_args &
 openvpn_pid=$!
 
 trap cleanup TERM

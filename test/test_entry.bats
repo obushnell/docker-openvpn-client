@@ -3,10 +3,10 @@
 setup() {
     CONFIG_PATH=/config
     export CONFIG_FILE_NAME=openvpn.conf
-    export CONFIG_FILE=
-    export ALLOWED_SUBNETS=
-    export AUTH_SECRET=
-    export KILL_SWITCH=
+    unset CONFIG_FILE=
+    unset ALLOWED_SUBNETS=
+    unset AUTH_SECRET=
+    unset KILL_SWITCH=
     export OPENVPN_DELAY=0
     run rm -r $CONFIG_PATH
     if [ "$1" == "config" ]; then
@@ -34,8 +34,6 @@ setup() {
     run time -p entry.sh 2> time_output.txt
 
     execution_time=$(grep -Eo 'user [0-9]+\.[0-9]+' time_output.txt | awk '{print $2}')
-    echo "Execution time: $execution_time"
-    echo "Lines: ${lines[@]}"
     [ $(( $(echo "$execution_time > 0.5" | bc -l) )) ]
     [ "$status" -eq 0 ]
     [ "${lines[0]}" = "using openvpn configuration file: $CONFIG_PATH/$CONFIG_FILE_NAME" ]
@@ -70,6 +68,23 @@ setup() {
     [ "${lines[2]}" = "Done" ]
 }
 
+@test "KILL_SWITCH defined but not 'true'" {
+    setup config
+
+    kill_switch_values=("false" "f" "no" "n" "0" "off" "disable" "disabled")
+
+    for value in "${kill_switch_values[@]}"; do
+        export KILL_SWITCH="$value"
+
+        run entry.sh
+
+        [ "$status" -eq 0 ]
+        [ "${lines[0]}" = "using openvpn configuration file: $CONFIG_PATH/$CONFIG_FILE_NAME" ]
+        [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config" ]
+        [ "${lines[2]}" = "Done" ]
+    done
+}
+
 @test "KILL_SWITCH enabled lowercase" {
     setup config
 
@@ -82,7 +97,7 @@ setup() {
 
         [ "$status" -eq 0 ]
         [ "${lines[0]}" = "using openvpn configuration file: $CONFIG_PATH/$CONFIG_FILE_NAME" ]
-        [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config --route-up /usr/local/bin/killswitch.sh " ]
+        [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config --route-up /usr/local/bin/killswitch.sh ''" ]
         [ "${lines[2]}" = "Done" ]
     done
 }
@@ -99,7 +114,7 @@ setup() {
 
         [ "$status" -eq 0 ]
         [ "${lines[0]}" = "using openvpn configuration file: $CONFIG_PATH/$CONFIG_FILE_NAME" ]
-        [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config --route-up /usr/local/bin/killswitch.sh " ]
+        [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config --route-up /usr/local/bin/killswitch.sh ''" ]
         [ "${lines[2]}" = "Done" ]
     done
 }
@@ -116,7 +131,7 @@ setup() {
 
         [ "$status" -eq 0 ]
         [ "${lines[0]}" = "using openvpn configuration file: $CONFIG_PATH/$CONFIG_FILE_NAME" ]
-        [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config --route-up /usr/local/bin/killswitch.sh " ]
+        [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config --route-up /usr/local/bin/killswitch.sh ''" ]
         [ "${lines[2]}" = "Done" ]
     done
 }
@@ -131,7 +146,7 @@ setup() {
 
     [ "$status" -eq 0 ]
     [ "${lines[0]}" = "using openvpn configuration file: $CONFIG_PATH/$CONFIG_FILE_NAME" ]
-    [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config --route-up /usr/local/bin/killswitch.sh $ALLOWED_SUBNETS" ]
+    [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config --route-up /usr/local/bin/killswitch.sh '$ALLOWED_SUBNETS'" ]
     [ "${lines[2]}" = "Done" ]
 }
 
@@ -145,7 +160,7 @@ setup() {
 
     [ "$status" -eq 0 ]
     [ "${lines[0]}" = "using openvpn configuration file: $CONFIG_PATH/$CONFIG_FILE_NAME" ]
-    [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config --route-up /usr/local/bin/killswitch.sh $ALLOWED_SUBNETS" ]
+    [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config --route-up /usr/local/bin/killswitch.sh '$ALLOWED_SUBNETS'" ]
     [ "${lines[2]}" = "Done" ]
 }
 
@@ -185,7 +200,7 @@ setup() {
 
     [ "$status" -eq 0 ]
     [ "${lines[0]}" = "using openvpn configuration file: $CONFIG_PATH/$CONFIG_FILE_NAME" ]
-    [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config --route-up /usr/local/bin/killswitch.sh  --auth-user-pass /run/secrets/$AUTH_SECRET" ]
+    [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config --route-up /usr/local/bin/killswitch.sh '' --auth-user-pass /run/secrets/$AUTH_SECRET" ]
     [ "${lines[2]}" = "Done" ]
 }
 
@@ -200,7 +215,7 @@ setup() {
 
     [ "$status" -eq 0 ]
     [ "${lines[0]}" = "using openvpn configuration file: $CONFIG_PATH/$CONFIG_FILE_NAME" ]
-    [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config --route-up /usr/local/bin/killswitch.sh $ALLOWED_SUBNETS --auth-user-pass /run/secrets/$AUTH_SECRET" ]
+    [ "${lines[1]}" = "--config $CONFIG_PATH/$CONFIG_FILE_NAME --cd /config --route-up /usr/local/bin/killswitch.sh '$ALLOWED_SUBNETS' --auth-user-pass /run/secrets/$AUTH_SECRET" ]
     [ "${lines[2]}" = "Done" ]
 }
 
