@@ -3,10 +3,10 @@
 setup() {
     CONFIG_PATH=/config
     export CONFIG_FILE_NAME=openvpn.conf
-    unset CONFIG_FILE=
-    unset ALLOWED_SUBNETS=
-    unset AUTH_SECRET=
-    unset KILL_SWITCH=
+    unset CONFIG_FILE
+    unset ALLOWED_SUBNETS
+    unset AUTH_SECRET
+    unset KILL_SWITCH
     export OPENVPN_DELAY=0
     run rm -r $CONFIG_PATH
     if [ "$1" == "config" ]; then

@@ -1,16 +1,18 @@
 FROM localhost/openvpn_client:latest
 
 RUN apk add --no-cache bash curl
-RUN curl -L -o bats.tar.gz https://github.com/bats-core/bats-core/archive/v1.4.1.tar.gz \
-    && tar -xf bats.tar.gz \
-    && cd bats-core-1.4.1 \
+
+ENV BATS_VERSION=1.9.0
+
+RUN curl -L -o /tmp/bats.tar.gz https://github.com/bats-core/bats-core/archive/v$BATS_VERSION.tar.gz \
+    && tar xf /tmp/bats.tar.gz -C /tmp \
+    && cd /tmp/bats-core-$BATS_VERSION \
     && ./install.sh /usr/local
+
 RUN rm /usr/sbin/openvpn
 COPY openvpn_mock /usr/sbin/openvpn
-
 RUN chmod +x /usr/sbin/openvpn
 
-RUN mkdir /test
 WORKDIR /test
 
 COPY *.bats .
